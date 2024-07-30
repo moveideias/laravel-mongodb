@@ -92,6 +92,24 @@ trait DocumentModel
         return $value;
     }
 
+	/**
+	 * Custom setter for the model's id.
+	 *
+	 * @param  mixed $value
+	 *
+	 * @return void
+	 */
+	public function setIdAttribute($value = null)
+	{
+		// Convert ObjectID to string.
+		if ($value instanceof ObjectID || $value instanceof Binary) {
+			$this->attributes['_id'] = $value;
+		} else {
+			$this->attributes['_id'] = $this->newBaseQueryBuilder()->convertKey($value);
+		}
+
+	}
+
     /** @inheritdoc */
     public function getQualifiedKeyName()
     {
