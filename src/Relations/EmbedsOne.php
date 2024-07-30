@@ -32,7 +32,7 @@ class EmbedsOne extends EmbedsOneOrMany
         $eager = $this->get();
 
         // EmbedsOne only brings one result, Eager needs a collection!
-        return $this->toCollection([$eager]);
+        return $this->toCollection($eager ? [$eager] : []);
     }
 
     /**
