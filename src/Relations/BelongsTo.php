@@ -36,7 +36,10 @@ class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
         // We'll grab the primary key name of the related models since it could be set to
         // a non-standard name and not "id". We will then construct the constraint for
         // our eagerly loading query so it returns the proper models from execution.
-        $this->query->whereIn($this->ownerKey, $this->getEagerModelKeys($models));
+
+		$whereIn = $this->whereInMethod($this->related, $this->ownerKey);
+
+        $this->whereInEager($whereIn, $this->ownerKey, $this->getEagerModelKeys($models));
     }
 
     /** @inheritdoc */

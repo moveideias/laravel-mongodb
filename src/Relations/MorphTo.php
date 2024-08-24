@@ -29,11 +29,27 @@ class MorphTo extends EloquentMorphTo
     {
         $instance = $this->createModelByType($type);
 
-        $key = $instance->getKeyName();
+        $ownerKey = $this->ownerKey ?? $instance->getKeyName();
 
-        $query = $instance->newQuery();
+        $query = $this->replayMacros($instance->newQuery())
+                            ->mergeConstraintsFrom($this->getQuery())
+                            ->with(array_merge(
+                                $this->getQuery()->getEagerLoads(),
+                                (array) ($this->morphableEagerLoads[get_class($instance)] ?? [])
+                            ))
+                            ->withCount(
+                                (array) ($this->morphableEagerLoadCounts[get_class($instance)] ?? [])
+                            );
 
-        return $query->whereIn($key, $this->gatherKeysByType($type, $instance->getKeyType()))->get();
+        if ($callback = ($this->morphableConstraints[get_class($instance)] ?? null)) {
+            $callback($query);
+        }
+
+        $whereIn = $this->whereInMethod($instance, $ownerKey);
+
+        return $query->{$whereIn}(
+            $ownerKey, $this->gatherKeysByType($type, $instance->getKeyType())
+        )->get();
     }
 
     /**
